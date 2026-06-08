@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Διατροφή"/>
+<title>Πρόγραμμα Διατροφής</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:Georgia,serif;background:#0f0f0f;color:#f0ece4;min-height:100vh;padding:env(safe-area-inset-top,20px) 16px 110px;max-width:480px;margin:0 auto;overflow-x:hidden;}
+button{font-family:Georgia,serif;cursor:pointer;border:none;outline:none;}
+input[type=range]{width:100%;accent-color:#4ade80;cursor:pointer;}
+
+.header{text-align:center;margin-bottom:18px;padding-top:10px;}
+.header-sub{font-size:10px;letter-spacing:4px;color:#555;text-transform:uppercase;margin-bottom:5px;}
+.header-title{font-size:24px;font-weight:bold;}
+.header-desc{font-size:11px;color:#666;margin-top:4px;}
+
+.tabs{display:flex;gap:4px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:9px 2px;border-radius:9px;font-size:16px;font-weight:700;transition:all .2s;}
+.tab-btn.active{background:#f0ece4;color:#0f0f0f;}
+.tab-btn.inactive{background:#1a1a1a;color:#555;}
+
+.day-scroll{display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;}
+.day-btn{flex-shrink:0;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:700;font-family:Georgia,serif;}
+
+.card{background:#1a1a1a;border-radius:14px;padding:16px;border:1px solid #252525;margin-bottom:12px;}
+.card-title{font-size:18px;margin-bottom:12px;}
+
+.meal-block{border-radius:10px;padding:10px 13px;margin-bottom:9px;}
+.meal-label{font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px;opacity:.6;color:#1a1a1a;}
+.meal-title{font-size:13px;font-weight:700;margin-bottom:6px;color:#1a1a1a;}
+.meal-item{font-size:12px;padding:3px 0;opacity:.85;color:#1a1a1a;}
+.meal-item+.meal-item{border-top:1px solid rgba(0,0,0,.07);}
+
+.nav-row{display:flex;justify-content:space-between;margin-top:10px;}
+.nav-btn{padding:9px 18px;border-radius:8px;border:1px solid #222;background:transparent;font-size:13px;font-family:Georgia,serif;}
+
+.notice{border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:12px;line-height:1.6;}
+.shop-run{margin-bottom:14px;}
+.shop-tag{display:inline-block;border-radius:7px;padding:3px 10px;font-size:12px;font-weight:800;color:#0f0f0f;}
+.shop-group{background:#1a1a1a;border-radius:9px;padding:10px 13px;margin-bottom:6px;border:1px solid #252525;}
+.shop-cat{font-weight:700;font-size:13px;margin-bottom:6px;color:#f0ece4;}
+.shop-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:13px;color:#ccc;}
+.shop-item+.shop-item{border-top:1px solid #1e1e1e;}
+.shop-dot{font-size:8px;margin-top:5px;flex-shrink:0;}
+
+.preset-row{display:flex;gap:6px;margin-bottom:16px;}
+.preset-btn{flex:1;padding:10px 4px;border-radius:9px;font-size:10px;font-weight:700;text-align:center;font-family:Georgia,serif;}
+
+.bar-row{margin-bottom:8px;}
+.bar-labels{display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:4px;}
+.bar-track{background:#222;border-radius:99px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.stat-box{background:#111;border-radius:10px;padding:12px 14px;}
+.stat-label{font-size:10px;color:#666;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:800;}
+.stat-unit{font-size:10px;color:#555;}
+
+.week-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer;}
+.week-row+.week-row{border-top:1px solid #1e1e1e;}
+
+.tip-card{background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #252525;}
+.tip-icon{font-size:18px;margin-bottom:6px;}
+.tip-title{font-weight:700;font-size:14px;margin-bottom:5px;color:#f0ece4;}
+.tip-text{font-size:13px;color:#888;line-height:1.6;}
+
+.cut-item{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13px;color:#cc4444;}
+.cut-item+.cut-item{border-top:1px solid #1e1e1e;}
+
+.progress-row{display:flex;justify-content:space-between;padding:7px 0;}
+.progress-row+.progress-row{border-top:1px solid #1e1e1e;}
+.progress-total{margin-top:10px;padding-top:10px;border-top:1px solid #252525;display:flex;justify-content:space-between;font-size:15px;font-weight:700;}
+
+.spray-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+.spray-row+.spray-row{border-top:1px solid #1e1e1e;}
+
+/* Water tracker */
+.water-grid{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
+.water-glass{width:44px;height:52px;border-radius:6px;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all .2s;background:#111;}
+.water-glass.filled{background:#1e3a5f;border-color:#60a5fa;}
+
+/* Vitamin cards */
+.vit-card{background:#1a1a1a;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #252525;display:flex;gap:14px;align-items:flex-start;}
+.vit-icon{font-size:28px;flex-shrink:0;}
+.vit-body{}
+.vit-name{font-weight:700;font-size:15px;color:#f0ece4;margin-bottom:3px;}
+.vit-dose{font-size:12px;color:#4ade80;font-weight:700;margin-bottom:4px;}
+.vit-why{font-size:12px;color:#888;line-height:1.5;}
+
+.drinks-row{display:flex;gap:8px;margin-bottom:4px;}
+.drink-box{flex:1;background:#111;border-radius:10px;padding:12px 10px;text-align:center;border:1px solid #252525;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-sub">Πρόγραμμα Διατροφής</div>
+  <div class="header-title">3 Εβδομάδες</div>
+  <div class="header-desc">1.750 kcal/μέρα · Γάνδη 🇧🇪 · ⚡ Κάτω από 12'</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active"  onclick="showTab('plan')"     id="tab-plan">📅</button>
+  <button class="tab-btn inactive" onclick="showTab('shopping')" id="tab-shopping">🛒</button>
+  <button class="tab-btn inactive" onclick="showTab('walk')"     id="tab-walk">🚶</button>
+  <button class="tab-btn inactive" onclick="showTab('water')"    id="tab-water">💧</button>
+  <button class="tab-btn inactive" onclick="showTab('tips')"     id="tab-tips">💡</button>
+</div>
+
+<!-- PLAN -->
+<div id="section-plan">
+  <div class="day-scroll" id="day-scroll"></div>
+  <div class="card" id="day-card"></div>
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev" onclick="changeDay(-1)" style="color:#f0ece4;">← Πριν</button>
+    <span id="day-counter" style="color:#444;align-self:center;font-size:12px;"></span>
+    <button class="nav-btn" id="btn-next" onclick="changeDay(1)"  style="color:#f0ece4;">Μετά →</button>
+  </div>
+</div>
+
+<!-- SHOPPING -->
+<div id="section-shopping" style="display:none;">
+  <div class="notice" style="background:#1e1a0e;border:1px solid #ca8a04;color:#fbbf24;">
+    🇧🇪 Express: <strong>«volkoren brood»</strong> ή <strong>«meergranen»</strong>. Δεν υπάρχει; → <strong>Wasa</strong>.
+  </div>
+  <div class="notice" style="background:#1a1a1a;border:1px solid #252525;color:#777;">
+    🔄 Ψώνια κάθε <strong style="color:#f0ece4;">2–3 μέρες</strong> · μικρές ποσότητες · 1 ράφι ψυγείου
+  </div>
+  <div id="shopping-content"></div>
+  <div class="notice" style="background:#1a1a1a;border:1px solid #252525;color:#666;margin-top:2px;">
+    💰 <strong style="color:#f0ece4;">~€30–40/εβδ.</strong> &nbsp;·&nbsp; 📦 <strong style="color:#f0ece4;">1 ράφι ψυγείου</strong> αρκεί
+  </div>
+</div>
+
+<!-- WALK -->
+<div id="section-walk" style="display:none;">
+  <div class="card">
+    <div style="font-size:18px;font-weight:bold;margin-bottom:4px;">🚶 Πόσο να περπατάς;</div>
+    <div style="font-size:12px;color:#666;margin-bottom:16px;">80kg · μέτριος ρυθμός · ~4.5 kcal/λεπτό</div>
+    <div class="preset-row" id="preset-row"></div>
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:8px;">
+        <span>Προσαρμογή</span>
+        <span id="walk-mins-label" style="color:#4ade80;font-weight:700;font-size:16px;">20 λεπτά</span>
+      </div>
+      <input type="range" id="walk-slider" min="10" max="90" value="20" oninput="updateWalk(this.value)"/>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#444;"><span>10'</span><span>90'</span></div>
+    </div>
+    <div id="walk-bars"></div>
+    <div class="stat-grid" id="walk-stats"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:#f0ece4;">📅 Εξέλιξη ανά εβδομάδα</div>
+    <div id="week-rows"></div>
+    <div style="margin-top:10px;font-size:11px;color:#444;font-style:italic;">Πάτα σε κάθε εβδομάδα για να δεις τα νούμερα ↑</div>
+  </div>
+</div>
+
+<!-- WATER & VITAMINS -->
+<div id="section-water" style="display:none;">
+  <!-- Water -->
+  <div class="card">
+    <div style="font-size:18px;font-weight:bold;margin-bottom:4px;">💧 Νερό σήμερα</div>
+    <div style="font-size:12px;color:#666;margin-bottom:4px;">Στόχος: <strong style="color:#60a5fa;">8 ποτήρια (2.5–3L)</strong></div>
+    <div style="font-size:11px;color:#555;margin-bottom:2px;">Πάτα κάθε ποτήρι όταν το πίνεις</div>
+    <div class="water-grid" id="water-grid"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div id="water-count" style="font-size:28px;font-weight:800;color:#60a5fa;">0/8</div>
+      <button onclick="resetWater()" style="background:#1e1e1e;color:#666;padding:8px 14px;border-radius:8px;font-size:12px;border:1px solid #333;">Reset</button>
+    </div>
+    <div id="water-msg" style="font-size:12px;color:#555;margin-top:8px;min-height:18px;"></div>
+  </div>
+
+  <!-- Drinks comparison -->
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:#f0ece4;">🥤 Τι να πίνεις</div>
+    <div class="drinks-row">
+      <div class="drink-box" style="border-color:#4ade8044;">
+        <div style="font-size:20px;margin-bottom:4px;">💧</div>
+        <div style="font-size:12px;font-weight:700;color:#4ade80;">Νερό</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;">Πάντα ✓</div>
+      </div>
+      <div class="drink-box" style="border-color:#4ade8044;">
+        <div style="font-size:20px;margin-bottom:4px;">🫧</div>
+        <div style="font-size:12px;font-weight:700;color:#4ade80;">Perrier</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;">Ιδανικό ✓</div>
+      </div>
+      <div class="drink-box" style="border-color:#fbbf2444;">
+        <div style="font-size:20px;margin-bottom:4px;">🥤</div>
+        <div style="font-size:12px;font-weight:700;color:#fbbf24;">Zero Cola</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;">Max 1/μέρα</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.6;">
+      ☕ Καφές χωρίς ζάχαρη: <strong style="color:#f0ece4;">2 το πολύ/μέρα</strong><br/>
+      🍵 Πράσινο τσάι: επιτρέπεται ελεύθερα, βοηθά μεταβολισμό
+    </div>
+  </div>
+
+  <!-- Boni protein note -->
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;color:#f0ece4;">🍫 Boni Protein (σοκολάτα)</div>
+    <div style="font-size:13px;color:#aaa;line-height:1.7;">
+      Κοίταξε την ετικέτα:<br/>
+      <span style="color:#4ade80;">✓ ΟΚ σαν σνακ</span> αν έχει <strong style="color:#f0ece4;">&gt;15g πρωτεΐνη</strong> και <strong style="color:#f0ece4;">&lt;15g ζάχαρη</strong><br/>
+      <span style="color:#fbbf24;">⚠️ 1×/εβδ. max</span> αν έχει περισσότερη ζάχαρη<br/><br/>
+      Γενικά τα Boni protein είναι αρκετά καλά — απλά πρόσεξε τα flavored varieties.
+    </div>
+  </div>
+
+  <!-- Vitamins -->
+  <div style="font-weight:700;font-size:15px;margin-bottom:12px;color:#f0ece4;padding-left:2px;">💊 Βιταμίνες (προτεινόμενες)</div>
+  <div class="vit-card">
+    <div class="vit-icon">☀️</div>
+    <div class="vit-body">
+      <div class="vit-name">Vitamin D3</div>
+      <div class="vit-dose">2.000 IU / μέρα</div>
+      <div class="vit-why">Βέλγιο = ελάχιστος ήλιος. Σχεδόν όλοι έχουν έλλειψη. Επηρεάζει μεταβολισμό, ανοσοποιητικό και διάθεση.</div>
+    </div>
+  </div>
+  <div class="vit-card">
+    <div class="vit-icon">🪨</div>
+    <div class="vit-body">
+      <div class="vit-name">Magnesium</div>
+      <div class="vit-dose">300mg / βράδυ</div>
+      <div class="vit-why">Βοηθά μυς, ύπνο και μεταβολισμό. Παίρνεις το βράδυ — βελτιώνει και την ποιότητα του ύπνου.</div>
+    </div>
+  </div>
+  <div class="vit-card">
+    <div class="vit-icon">🍊</div>
+    <div class="vit-body">
+      <div class="vit-name">Vitamin C</div>
+      <div class="vit-dose">500mg / μέρα</div>
+      <div class="vit-why">Ανοσοποιητικό + βοηθά την απορρόφηση σιδήρου από τα αυγά. Βρίσκεις στο Delhaize/DI φθηνά.</div>
+    </div>
+  </div>
+  <div class="notice" style="background:#1a1a1a;border:1px solid #252525;color:#666;font-size:11px;">
+    Όλα διαθέσιμα στο Delhaize, Carrefour ή DI (Dierendonck). Δεν είναι απαραίτητα αλλά αξίζουν τα χρήματά τους.
+  </div>
+</div>
+
+<!-- TIPS -->
+<div id="section-tips" style="display:none;">
+  <div class="tip-card">
+    <div class="tip-icon">🫧</div>
+    <div class="tip-title">Σπρέι λάδι — ανά χρήση</div>
+    <div id="spray-rows"></div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">🍌</div>
+    <div class="tip-title">Μπανάνα καθημερινά</div>
+    <div class="tip-text">1 μπανάνα/μέρα ΟΚ — ~90 kcal, κάλιο για μυς. Καλύτερα πρωί ή σνακ, όχι βράδυ.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">🍗</div>
+    <div class="tip-title">Meal prep trick</div>
+    <div class="tip-text">Κάθε φορά που τηγανίζεις κοτόπουλο, βάλε 1 επιπλέον. Αύριο βραδινό έτοιμο σε 2 λεπτά.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">🥚</div>
+    <div class="tip-title">Αυγά βραστά batch</div>
+    <div class="tip-text">Βράσε 4–5 αυγά μαζί. Κρατάνε 4 μέρες στο ψυγείο. Γρηγορότατο σνακ ή βραδινό.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-icon">📦</div>
+    <div class="tip-title">Χώρος ψυγείου</div>
+    <div class="tip-text">1 ράφι: αυγά + 1-2 αβοκάντο + μαγ. κοτόπουλο. Ρύζι sachets + Wasa έξω — 0 χώρος.</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-title" style="margin-bottom:10px;">❌ Κόψε εντελώς</div>
+    <div class="cut-item"><span>✕</span>Αναψυκτικά & χυμοί (όχι zero)</div>
+    <div class="cut-item"><span>✕</span>Γλυκά, μπισκότα</div>
+    <div class="cut-item"><span>✕</span>Τηγανητά (πολύ λάδι)</div>
+    <div class="cut-item"><span>✕</span>Αλκοόλ</div>
+    <div class="cut-item"><span>✕</span>Λευκό ψωμί</div>
+  </div>
+  <div class="tip-card">
+    <div class="tip-title" style="margin-bottom:10px;">📊 Αναμενόμενη πρόοδος</div>
+    <div class="progress-row"><span style="font-size:13px;color:#888;">Εβδ. 1</span><span style="font-size:14px;font-weight:700;color:#4ade80;">-1–1.5 κιλά</span></div>
+    <div class="progress-row"><span style="font-size:13px;color:#888;">Εβδ. 2</span><span style="font-size:14px;font-weight:700;color:#60a5fa;">-0.8–1 κιλό</span></div>
+    <div class="progress-row"><span style="font-size:13px;color:#888;">Εβδ. 3</span><span style="font-size:14px;font-weight:700;color:#a855f7;">-0.8–1 κιλό</span></div>
+    <div class="progress-total"><span>Σύνολο</span><span style="color:#4ade80;">~3–4 κιλά</span></div>
+  </div>
+</div>
+
+<script>
+const DAYS=["Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο","Κυριακή"];
+const MC={prwino:{bg:"#fef9c3",border:"#facc15",label:"☀️ Πρωινό"},mesimeri:{bg:"#dbeafe",border:"#3b82f6",label:"🍽️ Μεσημέρι"},snack:{bg:"#dcfce7",border:"#22c55e",label:"🍎 Σνακ"},vrадино:{bg:"#f3e8ff",border:"#a855f7",label:"🌙 Βραδινό"}};
+const MEALS=[
+  {day:"Δευτέρα",
+   prwino:{title:"2 αυγά + ½ αβοκάντο + ψωμί",items:["🥚 2 αυγά (τηγανητά ή βραστά)","🥑 ½ αβοκάντο","🍞 1 φέτα volkoren (~30g)","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Κοτόπουλο λωρίδες + ρύζι + σαλάτα",items:["🍗 1 κιβάκι λωρίδες (~150–200g)","🍚 ½ sachet ρύζι (~125g μαγ.)","🥗 ½ σακουλάκι σαλάτα","🫧 5–6 ψεκ. + λεμόνι","⏱️ ~10 λεπτά"]},
+   snack:{title:"Μπανάνα + γιαούρτι",items:["🍌 1 μπανάνα","🥣 1 ατομικό γιαούρτι σκέτο (~150g) ή Boni Protein"]},
+   vrадино:{title:"Ομελέτα + ντομάτα",items:["🥚 3 αυγά","🍅 1 μέτρια ντομάτα κομμένη","🫧 3–4 ψεκ. σπρέι","⏱️ ~5 λεπτά"]}},
+  {day:"Τρίτη",
+   prwino:{title:"2 αυγά scrambled + ψωμί + ντομάτα",items:["🥚 2 αυγά","🍞 1 φέτα volkoren (~30g)","🍅 1 μέτρια ντομάτα","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Μακαρόνια + τόνος + λεμόνι",items:["🍝 80g μακαρόνια ολικής (μισό ποτήρι ξερά)","🐟 1 κονσέρβα τόνος (~80–130g στραγγ.)","🍋 χυμός ½ λεμονιού","🫧 4–5 ψεκ. σπρέι","⏱️ ~10 λεπτά"]},
+   snack:{title:"Μπανάνα + αμύγδαλα",items:["🍌 1 μπανάνα","🥜 20 αμύγδαλα (~30g)"]},
+   vrадино:{title:"Φιλέτο χοιρινό + σαλάτα",items:["🥩 1 φιλέτο χοιρινό (~150g)","🥗 ½ σακουλάκι σαλάτα","🫧 4–5 ψεκ. τηγάνι + 5 ψεκ. σαλάτα","⏱️ ~8 λεπτά"]}},
+  {day:"Τετάρτη",
+   prwino:{title:"2 αυγά + ½ αβοκάντο + ψωμί",items:["🥚 2 αυγά","🥑 ½ αβοκάντο","🍞 1 φέτα volkoren (~30g)","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Κοτόπουλο λωρίδες + ρύζι + σαλάτα",items:["🍗 1 κιβάκι λωρίδες (~150–200g)","🍚 ½ sachet ρύζι (~125g μαγ.)","🥗 ½ σακουλάκι σαλάτα","🫧 5–6 ψεκ. για σαλάτα","⏱️ ~10 λεπτά"]},
+   snack:{title:"Μπανάνα + γιαούρτι",items:["🍌 1 μπανάνα","🥣 1 ατομικό γιαούρτι σκέτο (~150g) ή Boni Protein"]},
+   vrадино:{title:"Τόνος + αβοκάντο + Wasa",items:["🐟 1 κονσέρβα τόνος (~80–130g στραγγ.)","🥑 ½ αβοκάντο","🍞 2 Wasa κριτσίνια","🫧 3–4 ψεκ. + λεμόνι","⏱️ ~2 λεπτά"]}},
+  {day:"Πέμπτη",
+   prwino:{title:"2 αυγά scrambled + ψωμί + ντομάτα",items:["🥚 2 αυγά","🍞 1 φέτα volkoren (~30g)","🍅 1 μέτρια ντομάτα","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Ρύζι + 2 αυγά + κολοκυθάκι",items:["🍚 ½ sachet ρύζι (~125g μαγ.)","🥚 2 αυγά τηγανητά","🥦 1 κολοκυθάκι σε ροδέλες","🫧 4–5 ψεκ. σπρέι","⏱️ ~12 λεπτά"]},
+   snack:{title:"Μπανάνα + αμύγδαλα",items:["🍌 1 μπανάνα","🥜 20 αμύγδαλα (~30g)"]},
+   vrадино:{title:"Ομελέτα + αγγούρι",items:["🥚 3 αυγά","🥒 ½ αγγούρι σε ροδέλες","🫧 3–4 ψεκ. σπρέι","⏱️ ~5 λεπτά"]}},
+  {day:"Παρασκευή",
+   prwino:{title:"2 αυγά + ½ αβοκάντο + ψωμί",items:["🥚 2 αυγά","🥑 ½ αβοκάντο","🍞 1 φέτα volkoren (~30g)","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Κοτόπουλο + μακαρόνια + σάλτσα",items:["🍗 1 κιβάκι λωρίδες (~150–200g)","🍝 80g μακαρόνια ολικής","🍅 3–4 κ.σ. σάλτσα ντομάτας","🫧 4–5 ψεκ. σπρέι","⏱️ ~12 λεπτά"]},
+   snack:{title:"Μπανάνα + γιαούρτι",items:["🍌 1 μπανάνα","🥣 1 ατομικό γιαούρτι (~150g) ή Boni Protein"]},
+   vrадино:{title:"Κοτόπουλο (περίσσευμα) + σαλάτα",items:["🍗 ό,τι περίσσεψε από μεσημέρι","🥗 ½ σακουλάκι σαλάτα","🫧 5–6 ψεκ. σαλάτα","⏱️ ~2 λεπτά"]}},
+  {day:"Σάββατο",
+   prwino:{title:"2 αυγά + ½ αβοκάντο + ψωμί",items:["🥚 2 αυγά","🥑 ½ αβοκάντο","🍞 1 φέτα volkoren (~30g)","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Φιλέτο κρέας + ρύζι + σαλάτα",items:["🥩 1 φιλέτο χοιρινό/μοσχάρι (~150g)","🍚 ½ sachet ρύζι (~125g μαγ.)","🥗 ½ σακουλάκι σαλάτα","🫧 4–5 ψεκ. τηγάνι + 5–6 ψεκ. σαλάτα","⏱️ ~12 λεπτά"]},
+   snack:{title:"Μπανάνα + Wasa",items:["🍌 1 μπανάνα","🍞 2 Wasa + ¼ αβοκάντο"]},
+   vrадино:{title:"Αυγά βραστά + αβοκάντο + ντομάτα",items:["🥚 3 αυγά βραστά (από πριν)","🥑 ½ αβοκάντο","🍅 1 μέτρια ντομάτα","⏱️ ~2 λεπτά"]}},
+  {day:"Κυριακή",
+   prwino:{title:"2 αυγά + ½ αβοκάντο + ψωμί",items:["🥚 2 αυγά","🥑 ½ αβοκάντο","🍞 1 φέτα volkoren (~30g)","🫧 3–4 ψεκ. σπρέι"]},
+   mesimeri:{title:"Τόνος + ρύζι + λεμόνι",items:["🐟 1 κονσέρβα τόνος (~80–130g στραγγ.)","🍚 ½ sachet ρύζι (~125g μαγ.)","🍋 χυμός ½ λεμονιού","🫧 4–5 ψεκ. σπρέι","⏱️ ~10 λεπτά"]},
+   snack:{title:"Μπανάνα + γιαούρτι",items:["🍌 1 μπανάνα","🥣 1 ατομικό γιαούρτι (~150g) ή Boni Protein"]},
+   vrадино:{title:"Ομελέτα + σαλάτα",items:["🥚 3 αυγά","🥗 ½ σακουλάκι σαλάτα","🫧 3–4 ψεκ. + 5 ψεκ. σαλάτα","⏱️ ~5 λεπτά"]}},
+];
+const SHOPPING=[
+  {label:"Ψώνια Α",days:"Ημ. 1–3",color:"#4ade80",note:"Βάση εβδομάδας",groups:[
+    {cat:"🥚 Πρωτεΐνες",items:["Αυγά ×10","Κοτόπουλο λωρίδες/κιβάκια ×2 συσκευ.","Τόνος κονσέρβα ×2"]},
+    {cat:"🥑 Φρέσκα",items:["Αβοκάντο ×2 (σκληρά → ωριμάζουν)","Ντομάτες ×3","Αγγούρι ×1","Μπανάνες ×5 (1/μέρα)"]},
+    {cat:"🍞 Βάσεις",items:["Volkoren/meergranen brood ×1","Ρύζι sachets ×3","Μακαρόνια ολικής ~500g","Wasa κριτσίνια ×1 πακέτο"]},
+    {cat:"🥦 Λαχανικά & extra",items:["Σαλάτα σακουλάκι ×1","Κολοκυθάκι ×1","Γιαούρτι ατομικό ×3 ή Boni Protein ×2"]},
+  ]},
+  {label:"Ψώνια Β",days:"Ημ. 4–5",color:"#60a5fa",note:"Ανανέωση φρέσκων",groups:[
+    {cat:"🥚 Πρωτεΐνες",items:["Αυγά ×6","Τόνος κονσέρβα ×1","Φιλέτο χοιρινό ×1"]},
+    {cat:"🥑 Φρέσκα",items:["Αβοκάντο ×2","Μπανάνες ×3","Ντομάτα ×2"]},
+    {cat:"🍞 Ψωμί",items:["Volkoren brood ×1 (ή Wasa αν δεν υπάρχει)"]},
+    {cat:"🥗 Λαχανικά",items:["Σαλάτα σακουλάκι ×1","Αγγούρι ×1"]},
+  ]},
+  {label:"Ψώνια Γ",days:"Ημ. 6–7",color:"#f472b6",note:"Σ/Κ + αρχή επόμενης",groups:[
+    {cat:"🥚 Πρωτεΐνες",items:["Αυγά ×6","Κοτόπουλο λωρίδες ×1 συσκευ.","Φιλέτο χοιρινό/μοσχάρι ×1"]},
+    {cat:"🥑 Φρέσκα",items:["Αβοκάντο ×2","Μπανάνες ×3","Λεμόνι ×1"]},
+    {cat:"🧀 Extra",items:["Γιαούρτι ατομικό ×2 ή Boni Protein ×2","Ρύζι sachets ×2"]},
+  ]},
+];
+const PRESETS=[{label:"Τώρα",mins:20,emoji:"🚶"},{label:"Εβδ.1",mins:30,emoji:"🚶‍♂️"},{label:"Εβδ.2",mins:40,emoji:"💪"},{label:"Εβδ.3+",mins:50,emoji:"🔥"}];
+const SPRAY=[["🍳 Τηγάνι αυγά","3–4 ψεκ.","~18 kcal"],["🥗 Σαλάτα","5–6 ψεκ.","~27 kcal"],["🍗 Φιλέτο τηγάνι","4–5 ψεκ.","~23 kcal"],["🥦 Λαχανικά sauté","3–4 ψεκ.","~18 kcal"]];
+const WATER_MSGS=["Ξεκίνα! 💧","Καλή αρχή! 🙂","Στο δρόμο 🚶","Μισός στόχος! 👍","Πολύ καλά! 💪","Σχεδόν εκεί! 🔥","Ακόμα λίγο! ⚡","Τέλεια! Στόχος 🎯✅"];
+const TDEE=1950,TARGET=1750,KPM=4.5;
+
+let currentDay=0, walkMins=20, waterCount=0;
+
+function showTab(t){
+  ["plan","shopping","walk","water","tips"].forEach(s=>{
+    document.getElementById("section-"+s).style.display=s===t?"block":"none";
+    document.getElementById("tab-"+s).className="tab-btn "+(s===t?"active":"inactive");
+  });
+}
+
+function buildDayScroll(){
+  document.getElementById("day-scroll").innerHTML=DAYS.map((d,i)=>`
+    <button class="day-btn" onclick="setDay(${i})"
+      style="border:2px solid ${i===currentDay?"#f0ece4":"#222"};background:${i===currentDay?"#f0ece4":"transparent"};color:${i===currentDay?"#0f0f0f":"#666"};">
+      ${d.slice(0,3)}</button>`).join("");
+}
+
+function buildDayCard(){
+  const m=MEALS[currentDay];
+  document.getElementById("day-card").innerHTML=`
+    <div class="card-title">${m.day}</div>
+    ${["prwino","mesimeri","snack","vrадино"].map(k=>{
+      const c=MC[k],ml=m[k];
+      return `<div class="meal-block" style="background:${c.bg};border:1.5px solid ${c.border};">
+        <div class="meal-label">${c.label}</div>
+        <div class="meal-title">${ml.title}</div>
+        ${ml.items.map(it=>`<div class="meal-item">${it}</div>`).join("")}
+      </div>`;
+    }).join("")}
+    <div style="margin-top:8px;background:#111;border-radius:8px;padding:8px 12px;font-size:11px;color:#666;">
+      ⚡ Όλα έτοιμα σε <strong style="color:#4ade80;">κάτω από 12 λεπτά</strong>
+    </div>`;
+  document.getElementById("day-counter").textContent=`${currentDay+1}/7`;
+  document.getElementById("btn-prev").style.color=currentDay===0?"#333":"#f0ece4";
+  document.getElementById("btn-next").style.color=currentDay===6?"#333":"#f0ece4";
+}
+
+function setDay(i){currentDay=i;buildDayScroll();buildDayCard();}
+function changeDay(d){const n=currentDay+d;if(n>=0&&n<7)setDay(n);}
+
+function buildShopping(){
+  document.getElementById("shopping-content").innerHTML=SHOPPING.map(run=>`
+    <div class="shop-run">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span class="shop-tag" style="background:${run.color};">${run.label}</span>
+        <span style="font-size:12px;color:#666;">${run.days}</span>
+        <span style="font-size:11px;color:${run.color};opacity:.8;margin-left:auto;">${run.note}</span>
+      </div>
+      ${run.groups.map(g=>`
+        <div class="shop-group">
+          <div class="shop-cat">${g.cat}</div>
+          ${g.items.map(it=>`<div class="shop-item"><span class="shop-dot" style="color:${run.color};">◆</span>${it}</div>`).join("")}
+        </div>`).join("")}
+    </div>`).join("");
+}
+
+function buildWater(){
+  document.getElementById("water-grid").innerHTML=Array.from({length:8},(_,i)=>`
+    <div class="water-glass ${i<waterCount?"filled":""}" id="wg-${i}" onclick="toggleWater(${i})">
+      ${i<waterCount?"💧":"○"}
+    </div>`).join("");
+  document.getElementById("water-count").textContent=`${waterCount}/8`;
+  document.getElementById("water-msg").textContent=waterCount>0?WATER_MSGS[waterCount-1]:"Πίνε 1 ποτήρι πριν από κάθε γεύμα 💡";
+}
+
+function toggleWater(i){
+  waterCount=i<waterCount?i:i+1;
+  buildWater();
+}
+function resetWater(){waterCount=0;buildWater();}
+
+function updateWalk(v){
+  walkMins=parseInt(v);
+  document.getElementById("walk-mins-label").textContent=walkMins+" λεπτά";
+  document.getElementById("walk-slider").value=walkMins;
+  const wk=Math.round(walkMins*KPM),burn=TDEE+wk,def=burn-TARGET,wloss=((def*7)/7700).toFixed(2);
+  document.getElementById("walk-bars").innerHTML=[
+    {label:"Βασικός μεταβολισμός",value:TDEE,max:2800,color:"#60a5fa"},
+    {label:`Περπάτημα ${walkMins}'`,value:wk,max:500,color:"#4ade80"},
+    {label:"Πρόσληψη (φαγητό)",value:TARGET,max:2800,color:"#f472b6"},
+  ].map(b=>`<div class="bar-row">
+    <div class="bar-labels"><span>${b.label}</span><span style="color:${b.color};font-weight:700;">${b.value} kcal</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,(b.value/b.max)*100)}%;background:${b.color};"></div></div>
+  </div>`).join("");
+  document.getElementById("walk-stats").innerHTML=[
+    {label:"Συνολική καύση",value:burn,unit:"kcal/μέρα",color:"#60a5fa"},
+    {label:"Ημερήσιο έλλειμμα",value:def,unit:"kcal",color:"#4ade80"},
+    {label:"Εβδ. έλλειμμα",value:def*7,unit:"kcal/εβδ.",color:"#fbbf24"},
+    {label:"Απώλεια/εβδομάδα",value:"~"+wloss,unit:"κιλά",color:"#f472b6"},
+  ].map(s=>`<div class="stat-box" style="border:1px solid ${s.color}33;">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value" style="color:${s.color};">${s.value}</div>
+    <div class="stat-unit">${s.unit}</div>
+  </div>`).join("");
+  document.querySelectorAll(".preset-btn").forEach((btn,i)=>{
+    const a=PRESETS[i].mins===walkMins;
+    btn.style.border=`2px solid ${a?"#4ade80":"#252525"}`;
+    btn.style.background=a?"#0d2e1a":"transparent";
+    btn.style.color=a?"#4ade80":"#666";
+  });
+}
+
+function buildWalk(){
+  document.getElementById("preset-row").innerHTML=PRESETS.map((p,i)=>`
+    <button class="preset-btn" onclick="updateWalk(${p.mins})"
+      style="border:2px solid #252525;background:transparent;color:#666;">
+      <div style="font-size:18px;">${p.emoji}</div>
+      <div>${p.label}</div>
+      <div style="opacity:.8;">${p.mins}'</div>
+    </button>`).join("");
+  document.getElementById("week-rows").innerHTML=[
+    {week:"Εβδομάδα 1",mins:20,note:"Ό,τι κάνεις τώρα",color:"#888"},
+    {week:"Εβδομάδα 2",mins:35,note:"Ανέβα σταδιακά",color:"#60a5fa"},
+    {week:"Εβδομάδα 3",mins:50,note:"Ιδανικό για μέγιστο αποτέλεσμα",color:"#4ade80"},
+  ].map((w,i)=>`<div class="week-row" onclick="updateWalk(${w.mins})">
+    <div>
+      <div style="font-size:13px;color:#f0ece4;font-weight:600;">${w.week}</div>
+      <div style="font-size:11px;color:#555;margin-top:2px;">${w.note}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:16px;font-weight:800;color:${w.color};">${w.mins}'</div>
+      <div style="font-size:10px;color:#555;">~${Math.round(w.mins*KPM)} kcal</div>
+    </div>
+  </div>`).join("");
+  updateWalk(walkMins);
+}
+
+function buildSpray(){
+  document.getElementById("spray-rows").innerHTML=SPRAY.map(([u,s,k])=>`
+    <div class="spray-row">
+      <span style="font-size:14px;color:#ccc;">${u}</span>
+      <div style="text-align:right;">
+        <div style="font-size:14px;font-weight:700;color:#4ade80;">${s}</div>
+        <div style="font-size:11px;color:#555;">${k}</div>
+      </div>
+    </div>`).join("");
+}
+
+buildDayScroll();
+buildDayCard();
+buildShopping();
+buildWalk();
+buildWater();
+buildSpray();
+</script>
+</body>
+</html>
